@@ -20,7 +20,7 @@ public class ProyectoTista {
     public static void main(String[] args) {
         Random num= new Random();
         try {
-            FileWriter fw=new FileWriter("Prueba.text", true);
+            FileWriter fw=new FileWriter("Prueba.txt", true);
             for(int i=0;i<1000;i++){
                 int x=(int)(num.nextDouble()*10001);
                 double y=(double)x/100;
