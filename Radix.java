@@ -1,5 +1,4 @@
-
-package proyectotista;
+package proyecto;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -10,25 +9,32 @@ import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class Radix {
-    File q0=new File("q0.txt");
-    File q1=new File("q1.txt");
-    File q2=new File("q2.txt");
-    File q3=new File("q3.txt");
-    File q4=new File("q4.txt");
-    File q5=new File("q5.txt");
-    File q6=new File("q6.txt");
-    File q7=new File("q7.txt");
-    File q8=new File("q8.txt");
-    File q9=new File("q9.txt");
-    File og;
-    public Radix(File f){
-        og=f;
+public class Radix{
+    private String directorio;
+    private File q0=new File("q0.txt");
+    private File q1=new File("q1.txt");
+    private File q2=new File("q2.txt");
+    private File q3=new File("q3.txt");
+    private File q4=new File("q4.txt");
+    private File q5=new File("q5.txt");
+    private File q6=new File("q6.txt");
+    private File q7=new File("q7.txt");
+    private File q8=new File("q8.txt");
+    private File q9=new File("q9.txt");
+    private File og = null;
+    private int it = 0;
+    
+    public Radix(String fileName){
+        og = new File(fileName);
+        String path = og.getAbsolutePath();
+        directorio = path.substring(0,path.length()-4)+"_Iteraciones";
+        new File(directorio).mkdirs();
     }
-    public void particion(int cifra) throws IOException{
+    
+    private void particion(int cifra) throws IOException{
         int aux;
         float num;
-        Scanner sc=new Scanner(og).useDelimiter(",");
+        Scanner sc = new Scanner(og).useDelimiter(",");
         FileWriter fw0=new FileWriter(q0, true);
         FileWriter fw1=new FileWriter(q1, true);
         FileWriter fw2=new FileWriter(q2, true);
@@ -45,13 +51,9 @@ public class Radix {
             switch(aux){
                 case 0:
                     fw0.write(num+",");
-                    //if(!sc.hasNext()){
-                     //   fw0.write(num+",");
-                    //}
                     break;
                 case 1:
                     fw1.write(num+",");
-                    
                     break;
                 case 2:
                     fw2.write(num+",");
@@ -111,17 +113,19 @@ public class Radix {
         Scanner sc7=new Scanner(q7).useDelimiter(",");
         Scanner sc8=new Scanner(q8).useDelimiter(",");
         Scanner sc9=new Scanner(q9).useDelimiter(",");
+        System.out.print("Iteracion "+(++it)+(" [ "));
+        FileWriter iter = new FileWriter(new File("/"+directorio+"/Iteracion_"+(it)+"Radix_"+og.getName()));
         FileWriter fw=new FileWriter(og, true);
-        escribir(sc0, fw);
-        escribir(sc1, fw);
-        escribir(sc2, fw);
-        escribir(sc3, fw);
-        escribir(sc4, fw);
-        escribir(sc5, fw);
-        escribir(sc6, fw);
-        escribir(sc7, fw);
-        escribir(sc8, fw);
-        escribir(sc9, fw);
+        escribir(sc0, fw, iter);
+        escribir(sc1, fw, iter);
+        escribir(sc2, fw, iter);
+        escribir(sc3, fw, iter);
+        escribir(sc4, fw, iter);
+        escribir(sc5, fw, iter);
+        escribir(sc6, fw, iter);
+        escribir(sc7, fw, iter);
+        escribir(sc8, fw, iter);
+        escribir(sc9, fw, iter);
         sc0.close();
         sc1.close();
         sc2.close();
@@ -133,6 +137,8 @@ public class Radix {
         sc8.close();
         sc9.close();
         fw.close();
+        iter.close();
+        System.out.println(" ]");
         borrar(q0);
         borrar(q1);
         borrar(q2);
@@ -145,11 +151,14 @@ public class Radix {
         borrar(q9);
         
     }
-    public void escribir(Scanner sc, FileWriter fw) throws IOException{
+    
+    public void escribir(Scanner sc, FileWriter fw, FileWriter iter) throws IOException{
         float aux;
         while(sc.hasNext()){
             aux=sc.nextFloat();
             fw.write(aux+",");
+            iter.write(aux+",");
+            System.out.print(aux+",");
         }
     }
     public void borrar(File f) throws IOException{
@@ -165,12 +174,24 @@ public class Radix {
         return j;
     }
     public void mainRadix(){
-        
         try {
+            System.out.println("Iteraciones de Radix para "+og.getName());
             for(int i=1;i<5;i++){
                 particion(i);
                 vaciaColas(); 
             }
+            q0.delete();
+            q1.delete();
+            q2.delete();
+            q3.delete();
+            q4.delete();
+            q5.delete();
+            q6.delete();
+            q7.delete();
+            q8.delete();
+            q9.delete();
+            System.out.println("La salida quedó en el archivo original, pero se ha renombrado");
+            og.renameTo(new File("Salida_"+og.getName()));
         } catch (IOException ex) {
             Logger.getLogger(Radix.class.getName()).log(Level.SEVERE, null, ex);
         }
