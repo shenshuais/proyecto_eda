@@ -8,10 +8,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.ArrayList;
-/**
- *
- * @author Patch
- */
+
 public class Polifase {
     private final int BLOCKSIZE = 100;
     private int it=0;
@@ -21,15 +18,17 @@ public class Polifase {
     File f3 = new File("Auxiliar3.txt");
     String directorio = null;
     float aux1, aux2;
+    boolean orden;
     
-    public Polifase(String fileName){
+    public Polifase(String fileName, Boolean orden){
         original = new File(fileName);
         String  path = original.getAbsolutePath(); 
-        directorio = path.substring(0, path.length()-4); 
+        directorio = path.substring(0, path.length()-4) + "_Iteraciones"; 
         new File(directorio).mkdirs();
+        this.orden = orden;
     }
     
-    public void phase1() throws IOException{
+    public void divideAndSort() throws IOException{
         ArrayList<Float> block = new ArrayList<>(BLOCKSIZE);
         boolean writeFile = true;
         Scanner sc = new Scanner(original).useDelimiter(",");
@@ -40,8 +39,7 @@ public class Polifase {
             }
             Float[] blockArr = new Float[block.size()];
             blockArr = block.toArray(blockArr);
-            Quicksort q = new Quicksort();
-            q.sort(blockArr, 0, blockArr.length-1);
+            sort(blockArr, 0, blockArr.length-1);
             System.out.println("Iteración "+(++it)+Arrays.toString(blockArr));
             if(writeFile){
                 writeFiles(blockArr, f1);
@@ -77,7 +75,7 @@ public class Polifase {
                 int counterSc1=0;
                 int counterSc2=0;
                 while((counterSc1<mergeSize) && (counterSc2<mergeSize) && sc1.hasNext() && sc2.hasNext()){
-                    if(aux1<=aux2){
+                    if((aux1<=aux2 && orden) || (aux1>=aux2 && !orden)){
                         fw.write(aux1+",");
                         fiter.write(aux1+",");
                         counterSc1++;
@@ -137,7 +135,7 @@ public class Polifase {
                 int counterSc1=0;
                 int counterSc2=0;
                 while((counterSc1<mergeSize) && (counterSc2<mergeSize) && sc1.hasNext() && sc2.hasNext()){
-                    if(aux1<=aux2){
+                    if((aux1<=aux2 && orden) || (aux1>=aux2 && !orden)){
                         fw2.write(aux1+",");
                         fiter.write(aux1+",");
                         counterSc1++;
@@ -194,25 +192,27 @@ public class Polifase {
         }
             
     }
+    
     public void borrar(File f) throws IOException{
         BufferedWriter bw=new BufferedWriter(new FileWriter(f));
         bw.write("");
         bw.close();
     }
-     public int tamanoDeEntrada(File f) throws FileNotFoundException{
+    
+    public int tamanoDeEntrada(File f) throws FileNotFoundException{
         Scanner sc=new Scanner(f).useDelimiter(",");
         int counter=0;
-        float d=0.0f;
         while(sc.hasNext()){
-            d=sc.nextFloat();
+            sc.nextFloat();
             counter++;
         }
         return counter;
     }
-    public void cicloDeMerge(int tamano){
+     
+    public boolean mergeIntoFiles(int tamano){
+        boolean b1=true;
         try{
             int tamanoDeEntrada=tamano;
-            boolean b1=true;
             int mergeSize=BLOCKSIZE;
             while(mergeSize<tamanoDeEntrada){
                 if(b1){
@@ -247,15 +247,56 @@ public class Polifase {
         }catch(IOException ex){
             System.out.println("Error");
         }
+        return !b1;
     }
+    
  
     public void mainPoliphase(){
         try{
+            System.out.println("Iteraciones de Polifase para "+original.getName());
             int tamano=tamanoDeEntrada(original);
-            phase1();
-            cicloDeMerge(tamano);
+            divideAndSort();
+            boolean numArch = mergeIntoFiles(tamano);
+            original.delete();
+            f2.delete();
+            System.out.println(tamano = (tamano/100));
+            if(numArch){
+                f3.renameTo(new File("Salida_"+original.getName()));
+                System.out.println("La salida quedó en el archivo auxiliar 3, pero se ha renombrado.");
+                f1.delete();
+            }else{
+                f3.delete();
+                System.out.println("La salida quedó en el archivo auxiliar 1, pero se ha renombrado.");
+                f1.renameTo(new File("Salida"+original.getName()));
+            }
+            System.out.println("Las iteraciones están en una carpeta con el mismo nombre del archivo original.");
         }catch(IOException ex){
             System.out.println("Error");
+        }
+    }
+    
+    int partition(Float arr[], int low, int high){
+        float pivot = arr[high];
+        int i = (low-1);
+        for(int j=low; j<high; j++){
+            if((arr[j] <= pivot&& orden)||(arr[j] >= pivot&& !orden)){
+                i++;
+                float temp = arr[i];
+                arr[i] = arr[j];
+                arr[j] = temp;
+            }
+        }
+        float temp = arr[i+1];
+        arr[i + 1] = arr[high];
+        arr[high] = temp;
+        return i +1;
+    }
+    
+    void sort(Float arr[], int low, int high){
+        if(low<high){
+            int pi = partition(arr, low, high);
+            sort(arr, low, pi-1);
+            sort(arr, pi+1, high);
         }
     }
     
