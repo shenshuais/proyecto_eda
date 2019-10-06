@@ -160,26 +160,7 @@ public class Distribucion{
         return cifras;
         
     }
-    public boolean ordenado(File f) throws FileNotFoundException{
-        Scanner sc=new Scanner(f).useDelimiter(",");
-        float aux1=sc.nextFloat();
-        float aux2=sc.nextFloat();
-        boolean b=true;
-        while(sc.hasNext()){
-            if(aux1>aux2 && orden==true){
-                b=false;
-                break;
-            }
-            if(aux1<aux2 && orden==false)
-            {
-                b=false;
-                break;
-            }
-            aux1=aux2;
-            aux2=sc.nextFloat();
-        }
-        return b;
-    }
+
     public void mainDistribucion(){
         try {
             System.out.println("Iteraciones de Radix para "+og.getName());
@@ -192,8 +173,7 @@ public class Distribucion{
                 f[i].delete();
             }
             System.out.println("La salida quedó en el archivo original");
-            //System.out.println("El archivo es:"+ordenado(og));
-            og.renameTo(new File("Salida_"+og.getName()));
+            og.renameTo(new File("Salida"+og.getName()));
         } catch (IOException ex) {
             Logger.getLogger(Distribucion.class.getName()).log(Level.SEVERE, null, ex);
         }
