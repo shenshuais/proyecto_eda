@@ -1,9 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-package proyectotista;
+package proyecto;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -14,14 +9,22 @@ import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- *
- * @author Patch
- */
-public class MezclaEquilibrada {
+
+public class MezclaEquilibrada{
     File f1 = new File("Auxiliar1.txt");
     File f2 = new File("Auxiliar2.txt");
     File f3 = new File("Auxiliar3.txt");
+    String directorio, fileName;
+    boolean orden;
+    
+    public MezclaEquilibrada(String fileName, boolean orden){
+        this.fileName = fileName;
+        File original = new File(fileName);
+        String  path = original.getAbsolutePath(); 
+        directorio = path.substring(0, path.length()-4) + "_Iteraciones"; 
+        new File(directorio).mkdirs();
+        this.orden = orden;
+    }
     
     public void divide(String fileName) throws IOException{
         float previous = 0, current = 0;
@@ -29,12 +32,12 @@ public class MezclaEquilibrada {
         FileWriter fw = new FileWriter(f1, true);
         FileWriter fw2 = new FileWriter(f2, true);
         Scanner sc = new Scanner(new File(fileName)).useDelimiter(",");
-        String carpeta = "Iteraciones_Mezcla_Div";
-        new File(carpeta).mkdirs();
         File og = new File(fileName);
         System.out.println("División:");
         System.out.println("Bloque: " + i);
         while(sc.hasNext()){
+            FileWriter iter = new FileWriter(new File("/"+directorio+"/Division_"+i+"_MezclaEquilibrada_"+fileName));
+        
             previous = current;
             current = sc.nextFloat();
             
@@ -42,7 +45,7 @@ public class MezclaEquilibrada {
                 previous = current;
             }
             
-            if(previous > current){
+            if((previous > current && orden)||(previous < current && !orden)){
                 if(file == 1){
                     i++;
                     System.out.println();
@@ -59,12 +62,14 @@ public class MezclaEquilibrada {
             
             if(file == 1){
                 fw.write(current + ",");
+                iter.write(current +",");
             }else{
                 fw2.write(current + ",");
+                iter.write(current + ",");
             }
-            System.out.print(current);
+            System.out.print(current+",");
             
-        writeFiles(new File("/"+carpeta+"/IteracionDivision"+i), current);    
+            iter.close();
         }
         sc.close();
         fw.close();
@@ -75,12 +80,7 @@ public class MezclaEquilibrada {
         System.out.println();
     }
     
-    public void writeFiles(File fileName, float num) throws IOException{
-        FileWriter fw = new FileWriter(fileName.getName(), true);
-        fw.write(num + ",");
-        fw.close();
-    }
-    
+        
     public void merge(String fileName, String fileName2, String fileName3, String fileName4, int j) throws IOException{
         float previous = 0, current = 0;
         float previous2 = 0, current2 = 0;
@@ -89,60 +89,62 @@ public class MezclaEquilibrada {
         FileWriter fw2 = new FileWriter(fileName2, true);
         Scanner sc = new Scanner(new File(fileName3)).useDelimiter(",");
         Scanner sc2 = new Scanner(new File(fileName4)).useDelimiter(",");
-        String carpeta = "Iteraciones_Mezcla_Merge";
-        new File(carpeta).mkdirs();
         if(sc.hasNext())
             current = sc.nextFloat();
         if(sc2.hasNext())
             current2 = sc2.nextFloat();
-        File iter = new File("/"+carpeta+"/Iteracion_Mezcla_"+ j);
+        FileWriter iter = new FileWriter(new File("/"+directorio+"/Intercalacion_"+j+"_MezclaEquilibrada_"+fileName));
         while(sc.hasNext() || sc2.hasNext()){
             previous = current;
             previous2 = current2;
             System.out.println("Bloque: " + i);
-            while((previous <= current) && (previous2 <= current2) && sc.hasNext() && sc2.hasNext()){
-                if(current <= current2){
+            while((((previous <= current) && (previous2 <= current2) && orden) || ((previous >= current) && (previous2 >= current2) && !orden))  && sc.hasNext() && sc2.hasNext()){
+                if((current <= current2 && orden)||(current >= current2 && !orden)){
                     if(file == 1){
                         fw.write(current + ",");
+                        iter .write(current + ",");
                     }else{
                         fw2.write(current + ",");
+                        iter .write(current + ",");
                     }
-                    writeFiles(iter, current);
                     System.out.print(current + ",");
                     previous = current;
                     current = sc.nextFloat();
                 }else{
                     if(file==1){
                         fw.write(current2 + ",");
+                        iter.write(current2 + ",");
                     }else{
                         fw2.write(current2 + ",");
+                        iter.write(current2 + ",");
                     }
-                    writeFiles(iter, current2);
                     System.out.print(current2 + ",");
                     previous2 = current2;
                     current2 = sc2.nextFloat();
                 }
             }
             
-            while((previous <= current) && sc.hasNext()){
+            while((previous <= current && orden ||previous >= current && !orden ) && sc.hasNext()){
                 if(file == 1){
                     fw.write(current + ",");
+                    iter .write(current + ",");
                 }else{
                     fw2.write(current + ",");
+                    iter .write(current + ",");
                 }
-                writeFiles(iter, current);
                 System.out.print(current + ",");
                 previous = current;
                 current = sc.nextFloat();
             }
             
-            while((previous2 <= current2) && sc2.hasNext()){
+            while((previous2 <= current2 && orden || previous2 >= current2 && !orden) && sc2.hasNext()){
                 if(file == 1){
                     fw.write(current2 + ",");
+                    iter .write(current2 + ",");
                 }else{
                     fw2.write(current2 + ",");
+                    iter .write(current2 + ",");
                 }
-                writeFiles(iter, current2);
                 System.out.print(current2 + ",");
                 previous2 = current2;
                 current2 = sc2.nextFloat();
@@ -156,36 +158,52 @@ public class MezclaEquilibrada {
             i++;
         }
         if(file == 1){
-            if(current2 <= current){
-                if(current2 != 0)
+            if((current <= current2 && orden)||(current >= current2 && !orden)){
+                if(current2 != 0){
                     fw2.write(current2 + ",");
-                if(current != 0)
+                    iter .write(current2 + ",");
+                }
+                if(current != 0){
                     fw2.write(current + ",");
+                    iter .write(current + ",");
+                }
             }else{
-                if(current != 0)
+                if(current != 0){
                     fw2.write(current + ",");
-                if(current2 != 0)
+                    iter .write(current + ",");
+                }
+                if(current2 != 0){
                     fw2.write(current2 + ",");
+                    iter .write(current2 + ",");
+                }
             }
         }else{
             if(current2 <= current){
-                if(current2 != 0)
+                if(current2 != 0){
                     fw.write(current2 + ",");
-                if(current != 0)
+                    iter .write(current2 + ",");
+                }
+                if(current != 0){
                     fw.write(current + ",");
+                    iter .write(current + ",");
+                }
             }else{
-                if(current != 0)
+                if(current != 0){
                     fw.write(current + ",");
-                if(current2 != 0)
+                    iter .write(current + ",");
+                }
+                if(current2 != 0){
                     fw.write(current2 + ",");
+                    iter .write(current2 + ",");
+                }
             }
         }
-        writeFiles(iter, current);
-        writeFiles(iter, current2);
+        
         i++;
         sc.close();
         sc2.close();
         fw.close();
+        iter.close();
         BufferedWriter bw=new BufferedWriter(new FileWriter(fileName3));
         bw.write("");
         bw.close();
@@ -207,29 +225,30 @@ public class MezclaEquilibrada {
     }
     
     public void mainMezcla(){
-        Scanner name = new Scanner(System.in);
         int i = 0, tam;
-        String fileName;
-        MezclaEquilibrada prueba = new MezclaEquilibrada();
         System.out.println("Escribe el nombre del archivo a ordenar:");
         try {
-            fileName = name.next();
             tam = tamanoDeEntrada(fileName);
             System.out.println("Iteración: " + (i + 1));
-            prueba.divide(fileName);
+            divide(fileName);
             System.out.println("Mezcla");
             while(tamanoDeEntrada("Auxiliar1.txt") != tam){
                 System.out.println("Iteración: " + (i + 1));
                 if(i % 2 == 0){
-                    prueba.merge(fileName, "Auxiliar3.txt", "Auxiliar1.txt", "Auxiliar2.txt", i);
+                    merge(fileName, "Auxiliar3.txt", "Auxiliar1.txt", "Auxiliar2.txt", i);
                 }else{
-                    prueba.merge("Auxiliar1.txt","Auxiliar2.txt", fileName, "Auxiliar3.txt", i);
+                    merge("Auxiliar1.txt","Auxiliar2.txt", fileName, "Auxiliar3.txt", i);
                 }
                 i++;
             }
+           File og = new File(fileName);
+           og.delete();
+           f2.delete();
+           f3.delete();
+           f1.renameTo(new File("Salida"+fileName));
+           
         } catch (IOException ex) {
             Logger.getLogger(MezclaEquilibrada.class.getName()).log(Level.SEVERE, null, ex);
         }
-        name.close();
     }
 }
