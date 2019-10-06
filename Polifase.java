@@ -17,7 +17,7 @@ public class Polifase {
     File f2 = new File("Auxiliar2.txt");
     File f3 = new File("Auxiliar3.txt");
     String directorio = null;
-    float aux1, aux2;
+    int tamanoDeEntrada;
     boolean orden;
     
     public Polifase(String fileName, Boolean orden){
@@ -28,7 +28,7 @@ public class Polifase {
         this.orden = orden;
     }
     
-    public void divideAndSort() throws IOException{
+    private void divideAndSort() throws IOException{
         ArrayList<Float> block = new ArrayList<>(BLOCKSIZE);
         boolean writeFile = true;
         Scanner sc = new Scanner(original).useDelimiter(",");
@@ -55,7 +55,7 @@ public class Polifase {
         borrar(original);
     }
     
-    public void writeFiles(Float[] block, File f1) throws IOException{
+    private void writeFiles(Float[] block, File f1) throws IOException{
         FileWriter fw = new FileWriter(f1, true);
         for (int j = 0; j < block.length; j++) {
             fw.write(block[j] + ",");
@@ -63,13 +63,13 @@ public class Polifase {
         fw.close();
     }
     
-    public void merge(Scanner sc1, Scanner sc2, FileWriter fw, FileWriter fw2, int mergeSize) throws IOException{
+    private void merge(Scanner sc1, Scanner sc2, FileWriter fw, FileWriter fw2, int mergeSize) throws IOException{
         boolean b1=true;
         float aux1=sc1.nextFloat();
         float aux2=sc2.nextFloat();
         
         while(sc1.hasNext() || sc2.hasNext()){
-            if(b1==true){
+            if(b1){
                 System.out.print("Iteración "+(++it)+"[");
                 FileWriter fiter = new FileWriter((new File("/"+directorio+"/Iteracion"+it+"_Polifase_"+original.getName())), true);
                 int counterSc1=0;
@@ -97,8 +97,7 @@ public class Polifase {
                             fiter.write(aux2+",");
                             System.out.print(aux2+",");
                         }
-                    }   
-                    
+                    }    
                 }
 
                 while(counterSc2<mergeSize && sc2.hasNext()){
@@ -129,6 +128,7 @@ public class Polifase {
                 b1=false;
                 System.out.println("]");
                 fiter.close();
+                
             }else{
                 System.out.print("Iteración "+(++it)+"[");
                 FileWriter fiter = new FileWriter((new File("/"+directorio+"/Iteracion"+it+"_Polifase_"+original.getName())), true);
@@ -139,7 +139,7 @@ public class Polifase {
                         fw2.write(aux1+",");
                         fiter.write(aux1+",");
                         counterSc1++;
-                        System.out.println(aux1+",");
+                        System.out.print(aux1+",");
                         aux1=sc1.nextFloat();
                         if(!sc1.hasNext()){
                             fw.write(aux1+",");
@@ -193,14 +193,14 @@ public class Polifase {
             
     }
     
-    public void borrar(File f) throws IOException{
+    private void borrar(File f) throws IOException{
         BufferedWriter bw=new BufferedWriter(new FileWriter(f));
         bw.write("");
         bw.close();
     }
     
-    public int tamanoDeEntrada(File f) throws FileNotFoundException{
-        Scanner sc=new Scanner(f).useDelimiter(",");
+    private int tamanoDeEntrada() throws FileNotFoundException{
+        Scanner sc=new Scanner(original).useDelimiter(",");
         int counter=0;
         while(sc.hasNext()){
             sc.nextFloat();
@@ -209,12 +209,11 @@ public class Polifase {
         return counter;
     }
      
-    public boolean mergeIntoFiles(int tamano){
+    private boolean mergeIntoFiles(){
         boolean b1=true;
         try{
-            int tamanoDeEntrada=tamano;
             int mergeSize=BLOCKSIZE;
-            while(mergeSize<tamanoDeEntrada){
+            while(mergeSize < tamanoDeEntrada){
                 if(b1){
                     Scanner sc1=new Scanner(f1).useDelimiter(",");
                     Scanner sc2=new Scanner(f2).useDelimiter(",");
@@ -249,17 +248,17 @@ public class Polifase {
         }
         return !b1;
     }
-    
+        
  
     public void mainPoliphase(){
         try{
             System.out.println("Iteraciones de Polifase para "+original.getName());
-            int tamano=tamanoDeEntrada(original);
+            tamanoDeEntrada = tamanoDeEntrada();
             divideAndSort();
-            boolean numArch = mergeIntoFiles(tamano);
+            boolean numArch = mergeIntoFiles();
             original.delete();
             f2.delete();
-            System.out.println(tamano = (tamano/100));
+            
             if(numArch){
                 f3.renameTo(new File("Salida_"+original.getName()));
                 System.out.println("La salida quedó en el archivo auxiliar 3, pero se ha renombrado.");
