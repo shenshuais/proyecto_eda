@@ -5,7 +5,15 @@ import javax.swing.JOptionPane;
 
 public class ProyectoTista {
     public static void main(String[] args){ 
-        boolean b=false;
+        try{
+            displayMenu();
+        }catch(NullPointerException e){
+            System.out.println("Ejecución cancelada por el usuario");
+        }
+       
+    }
+    public static void displayMenu(){
+         boolean b=false;
         JOptionPane.showMessageDialog(null, "          BIENVENIDOS\nORDENAMIENTO EXTERNO\n");
         do{
             File f=null;
@@ -119,6 +127,6 @@ public class ProyectoTista {
 		}
             
         }while(b);
-    }  
+    }
     
 }
